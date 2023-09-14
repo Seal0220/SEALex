@@ -1,0 +1,29 @@
+{
+    "manifest_version": 2,
+    "name": "SEALex",
+    "description": "SEAL following YOU!!",
+    "version": "1.0",
+    "icons": {
+        "16": "SEAL.png",
+        "48": "SEAL.png",
+        "128": "SEAL.png"
+    },
+    "permissions": [
+        "activeTab",
+        "<all_urls>"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        "SEAL.png",
+        "seal-animation/*"
+    ]
+}
