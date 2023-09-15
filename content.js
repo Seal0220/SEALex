@@ -19,62 +19,62 @@ styleElement.innerHTML = `
 document.head.appendChild(styleElement)
 
 
-let x = 0, y = 0
-let targetX = 0, targetY = 0
-const easing = 0.1
-let frameIndex = 0
-const frameCount = 14
-const frameRate = 300
-let shouldAnimate = false
-let idleTime = 500
-let idleTimer
+let x = 0, y = 0;
+let targetX = 0, targetY = 0;
+const easing = 0.01;
+let frameIndex = 0;
+const frameCount = 14;
+let shouldAnimate = false;
+let idleTime = 500;
+let idleTimer;
+const epsilon = 35;
 
 function animate() {
-  const dx = (targetX - x) * easing
-  const dy = (targetY - y) * easing
-  
-  x += dx
-  y += dy
+  function follow() {
+    const dx = (targetX - x) * easing;
+    const dy = (targetY - y) * easing;
 
-  const imgDiv = document.getElementById('follow-mouse-img')
-  if (imgDiv) {
-    imgDiv.style.left = x + 'px'
-    imgDiv.style.top = y + 'px'
-  }
+    x += dx;
+    y += dy;
 
-  updateFrame()
-  requestAnimationFrame(animate)
-}
-
-function updateFrame() {
-    if (shouldAnimate || frameIndex !== 0) {
-      const frameName = `seal_${String(frameIndex).padStart(2, '0')}.png`
-      const imageUrl = chrome.extension.getURL(`seal-animation/${frameName}`)
-      const imgElement = document.querySelector('#follow-mouse-img img')
-      
-      imgElement.src = imageUrl
-      
-      frameIndex = (frameIndex + 1) % frameCount
-    } else {
-      frameIndex = 0
-      const frameName = `seal_${String(frameIndex).padStart(2, '0')}.png`
-      const imageUrl = chrome.extension.getURL(`seal-animation/${frameName}`)
-      const imgElement = document.querySelector('#follow-mouse-img img')
-      imgElement.src = imageUrl
+    const imgDiv = document.getElementById('follow-mouse-img');
+    if (imgDiv) {
+      imgDiv.style.left = x + 'px';
+      imgDiv.style.top = y + 'px';
     }
   }
 
-document.addEventListener('mousemove', function(event) {
-  targetX = event.clientX + 15
-  targetY = event.clientY + 15
-  shouldAnimate = true
+  if (shouldAnimate || Math.abs(x - targetX) > epsilon || Math.abs(y - targetY) > epsilon) {
+    follow()
+    const frameName = `seal_${String(frameIndex).padStart(2, '0')}.png`;
+    const imageUrl = chrome.extension.getURL(`seal-animation/${frameName}`);
+    const imgElement = document.querySelector('#follow-mouse-img img');
+    imgElement.src = imageUrl;
 
-  clearTimeout(idleTimer)
+    frameIndex = (frameIndex + 1) % frameCount;
+  }
+  else if (!shouldAnimate && Math.abs(x - targetX) <= epsilon && Math.abs(y - targetY) <= epsilon) {
+    frameIndex = 0;
+    const frameName = `seal_${String(frameIndex).padStart(2, '0')}.png`;
+    const imageUrl = chrome.extension.getURL(`seal-animation/${frameName}`);
+    const imgElement = document.querySelector('#follow-mouse-img img');
+    imgElement.src = imageUrl;
+  }
+
+  requestAnimationFrame(animate);
+}
+
+document.addEventListener('mousemove', function (event) {
+  targetX = event.clientX;
+  targetY = event.clientY;
+  shouldAnimate = true;
+
+  clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
-    shouldAnimate = false
-  }, idleTime)
-})
+    shouldAnimate = false;
+  }, idleTime);
+});
 
-requestAnimationFrame(animate)
-setInterval(updateFrame, frameRate)
+requestAnimationFrame(animate);
+
 
